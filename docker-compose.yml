@@ -1,0 +1,35 @@
+version: "3.7"
+
+services:
+    app:
+        build: ./code
+        environment:
+            - DATABASE_URI=postgres://postgres:secret@db/postgres
+        ports:
+            - "3000:3000"
+        working_dir: /app
+        volumes:
+            - type: bind
+            source: ./code
+            target: /app
+            - type: bind
+            source: ./data
+            target: /data
+        depends_on:
+            - db
+    db:
+        image: postgres:12-alpine
+        environment: 
+            - POSTGRES_PASSWORD=secret
+        ports:
+            - "8000:5432"
+        volumes:
+            - type: volume
+            source: news-db
+            target: /var/lib/postgres
+        
+    cron:
+        build: ./cron
+
+volumes:
+    news-db:
