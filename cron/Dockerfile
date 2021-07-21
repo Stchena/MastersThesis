@@ -1,6 +1,7 @@
 FROM ubuntu:latest
 
 # Install cron
+RUN apt-get update && apt-get -y update
 RUN apt-get install cron
 
 # Add crontab file in cron directory

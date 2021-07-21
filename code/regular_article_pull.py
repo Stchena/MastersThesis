@@ -9,17 +9,20 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import DatabaseError
 from datetime import date
 import spacy
-from .articles_orm import Article, ArticleFeatures
-from .utils import read_topics
+from articles_orm import Base, Article, ArticleFeatures
+from utils import read_file_content
 
 
 newsapi = NewsApiClient(api_key='fbfb692eb3844ce59e10eea6069d1161')
 database_uri = f"sqlite:///NewsAPI_articles.db"
-if environ['DATABASE_URI'] is not None:
-    database_uri = environ['DATABASE_URI'] # switch to postgres db if run in container
+try:
+    if environ['DATABASE_URI'] is not None:
+        database_uri = environ['DATABASE_URI'] # switch to postgres db if ran in container
+except: 
+    pass
 engine = create_engine(database_uri)
-topic_list = read_topics()
-nlp = spacy.load()
+topic_list = read_file_content('/data/topics.txt')
+nlp = spacy.load('en_core_web_md')
 
 
 def pull_todays_articles() -> Dict[str, Any]:
@@ -34,31 +37,35 @@ def pull_todays_articles() -> Dict[str, Any]:
         for topic in topic_list}
 
 
-def truncate_duplicated_articles(session: Session, todays_articles: Dict[str, Any]) -> Dict[str, Any]:
+def truncate_duplicated_articles(session: Session, todays_articles: Dict[str, Any]) -> Dict[str, List[Any]]:
     truncated_articles = {}
+    _articles_titles = []
     for topic in topic_list:
             cta = todays_articles[topic]['articles']
             current_topic_articles = []
-            current_topic_articles_titles = []
             try:
                 session.query(Article) # probe the db
                 is_table_existent = 1
             except DatabaseError:
                 is_table_existent = 0
             for article in cta:
-                # check duplicacy against itself and against data already stored in DB (to save only unique articles TEST)
-                if (article['title'] not in current_topic_articles_titles):
-                    if (is_table_existent and (not any(session.query(Article).filter(Article.title == article['title'])))):
-                        current_topic_articles += [article]
-                        current_topic_articles_titles += [article['title']]
+                # check duplicacy against itself and against data already stored in DB (to save only unique articles)
+                # checking against DB also prunes cross-topic duplicates
+                is_article_unique = article['title'] not in _articles_titles
+                if (is_table_existent):
+                    is_article_unique = is_article_unique and (not any(session.query(Article).filter(Article.title == article['title'])))
+                if (is_article_unique):
+                    current_topic_articles += [article]
+                    _articles_titles += [article['title']]
             truncated_articles[topic] = current_topic_articles
     return truncated_articles
 
 
 def store_articles_urls(session: Session, todays_articles: Dict[str, Any]) -> Dict[str, Any]:
     truncated_articles = truncate_duplicated_articles(session, todays_articles)
-    topic_urls = {topic: article['url']
-                        for topic, article in truncated_articles.items()}
+    topic_urls = {}
+    for topic, articles in truncated_articles.items():
+        topic_urls[topic] = [article['url'] for article in articles]
     return topic_urls
 
 
@@ -81,26 +88,29 @@ def extract_and_save_maintexts_to_db(session: Session, topic_urls: List[Any]) ->
                     url=url
                 )
                 objects += [mdl_article]
-        # bulk save all topics then flush
+        # bulk save all in topic then flush and go again for next topic
         session.bulk_save_objects(objects)
         session.commit()
         objects = []
 
 
 def preprocess_articles(articles: List[Any]) -> List[Any]:
-    pass
+    return ["done"]
 
 
 if __name__ == "__main__":
 
     print("#1 Pulling today's articles...")
     todays_articles = pull_todays_articles()
+    # Attempt to create schema. If already exists, will not do anything
+    Base.metadata.create_all(engine)
     with Session(engine) as session:
         print('#2 Preparing urls and truncating duplicates...')
         topic_urls = store_articles_urls(session, todays_articles)
         print("#3 Extracting main content and saving to database...")
         extract_and_save_maintexts_to_db(session, topic_urls)
         print('#4 Pulling updated articles from database...')
-        articles = session.query(Article).all()
+        articles = session.query(Article).distinct(Article.title).all() # work on cutting duplicates...
     print('#5 Preprocessing texts...')
     something = preprocess_articles(articles)
+    print(something[0])

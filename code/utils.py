@@ -5,10 +5,11 @@ from sklearn.metrics import silhouette_score
 from sklearn.cluster import KMeans
 import numpy as np
 
-def read_topics():
-    with open('/data/topics.txt', 'r') as f:
-        topics = [line.rstrip('\n') for line in f]
-        return topics
+
+def read_file_content(filepath: str):
+    with open(filepath, 'r') as f:
+        content = [line.rstrip('\n') for line in f]
+        return content
 
 
 @Language.component('money_merger')

@@ -4,17 +4,17 @@ services:
     app:
         build: ./code
         environment:
-            - DATABASE_URI=postgres://postgres:secret@db/postgres
+            - DATABASE_URI=postgresql://postgres:secret@db/postgres
         ports:
             - "3000:3000"
         working_dir: /app
         volumes:
             - type: bind
-            source: ./code
-            target: /app
+              source: ./code
+              target: /app
             - type: bind
-            source: ./data
-            target: /data
+              source: ./data
+              target: /data
         depends_on:
             - db
     db:
@@ -25,8 +25,8 @@ services:
             - "8000:5432"
         volumes:
             - type: volume
-            source: news-db
-            target: /var/lib/postgres
+              source: news-db
+              target: /var/lib/postgres
         
     cron:
         build: ./cron
