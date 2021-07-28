@@ -19,6 +19,7 @@ afterwards
 again
 against
 ah
+al
 all
 almost
 alone
@@ -110,12 +111,15 @@ couldnt
 d
 date
 did
+didn
 didn't
 different
 do
 does
+doesn
 doesn't
 doing
+don
 done
 don't
 down
@@ -185,11 +189,15 @@ got
 gotten
 h
 had
+hadn
+hadn't
 happens
 hardly
 has
+hasn
 hasn't
 have
+haven
 haven't
 having
 he
@@ -236,6 +244,7 @@ into
 invention
 inward
 is
+isn
 isn't
 it
 itd
@@ -271,6 +280,7 @@ liked
 likely
 line
 little
+ll
 'll
 look
 looking
@@ -295,6 +305,7 @@ might
 million
 miss
 ml
+mln
 more
 moreover
 most
@@ -419,7 +430,6 @@ regardless
 regards
 related
 relatively
-research
 respectively
 resulted
 resulting
@@ -453,6 +463,7 @@ shed
 she'll
 shes
 should
+shouldn
 shouldn't
 show
 showed
@@ -493,7 +504,8 @@ such
 sufficiently
 suggest
 sup
-sure 	t
+sure
+t
 take
 taken
 taking
@@ -586,6 +598,7 @@ usually
 v
 value
 various
+ve
 've
 very
 via

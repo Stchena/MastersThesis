@@ -11,6 +11,7 @@ from datetime import date
 import spacy
 from articles_orm import Base, Article, ArticleFeatures
 from utils import read_file_content
+from time import time
 
 
 newsapi = NewsApiClient(api_key='fbfb692eb3844ce59e10eea6069d1161')
@@ -101,7 +102,9 @@ def preprocess_articles(articles: List[Any]) -> List[Any]:
 if __name__ == "__main__":
 
     print("#1 Pulling today's articles...")
+    t0 = time()
     todays_articles = pull_todays_articles()
+    print(f"Completed in {time()-t0}s")
     # Attempt to create schema. If already exists, will not do anything
     Base.metadata.create_all(engine)
     with Session(engine) as session:

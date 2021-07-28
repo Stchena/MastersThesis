@@ -17,6 +17,23 @@ services:
               target: /data
         depends_on:
             - db
+    playground:
+        image: jupyter/base-notebook
+        build: ./playground
+        environment:
+            - DATABASE_URI=postgresql://postgres:secret@db/postgres
+        ports:
+            - "127.0.0.1:8888:8888"
+        volumes:
+            - type: bind
+              source: ./playground
+              target: /analysis
+            - type: bind
+              source: ./code
+              target: /app
+            - type: bind
+              source: ./data
+              target: /data
     db:
         image: postgres:12-alpine
         environment: 
@@ -27,9 +44,5 @@ services:
             - type: volume
               source: news-db
               target: /var/lib/postgres
-        
-    cron:
-        build: ./cron
-
 volumes:
     news-db:
