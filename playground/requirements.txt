@@ -42,5 +42,5 @@ sklearn==0.0
 spacy==3.0.6
 spacy-legacy==3.0.6
 SQLAlchemy==1.4.15
-wordcloud==1.8.1
-
+pytictoc==1.5.2
+pytest==6.2.4

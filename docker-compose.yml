@@ -4,7 +4,7 @@ services:
     app:
         build: ./code
         environment:
-            - DATABASE_URI=postgresql://postgres:secret@db/postgres
+            - DATABASE_URI=postgresql://postgres:secret@db/primary
         ports:
             - "3000:3000"
         working_dir: /app
@@ -21,7 +21,8 @@ services:
         image: jupyter/base-notebook
         build: ./playground
         environment:
-            - DATABASE_URI=postgresql://postgres:secret@db/postgres
+            - DATABASE_URI=postgresql://postgres:secret@db/primary
+            - TEST_DB_URI=postgresql://postgres:secret@test_db/test_db
         ports:
             - "127.0.0.1:8888:8888"
         volumes:
@@ -37,6 +38,7 @@ services:
     db:
         image: postgres:12-alpine
         environment: 
+            - POSTGRES_DB=primary
             - POSTGRES_PASSWORD=secret
         ports:
             - "8000:5432"
@@ -44,5 +46,17 @@ services:
             - type: volume
               source: news-db
               target: /var/lib/postgres
+    test_db:
+        image: postgres:12-alpine
+        environment: 
+            - POSTGRES_DB=test_db
+            - POSTGRES_PASSWORD=secret
+        ports:
+            - "8001:5433"
+        volumes:
+            - type: volume
+              source: test-db
+              target: /var/lib/tst_postgres
 volumes:
     news-db:
+    test-db:
