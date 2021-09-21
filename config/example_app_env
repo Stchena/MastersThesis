@@ -1,0 +1,3 @@
+GNEWS_API_KEY=YOUR_API_KEY_HERE
+DATABASE_URI=postgresql://USERNAME:PWD@db/primary
+TEST_DB_URI=postgresql://USERNAME:PWD@test_db/test_db

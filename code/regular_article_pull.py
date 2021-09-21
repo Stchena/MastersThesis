@@ -13,8 +13,7 @@ from articles_orm import Base, Article, ArticleFeatures
 from utils import read_file_content
 from pytictoc import TicToc
 
-
-newsapi = NewsApiClient(api_key='fbfb692eb3844ce59e10eea6069d1161')
+newsapi = NewsApiClient(api_key=environ['GNEWS_API_KEY'])
 database_uri = f"sqlite:///NewsAPI_articles.db"
 try:
     if environ['DATABASE_URI'] is not None:
@@ -52,18 +51,13 @@ def truncate_duplicated_articles(session: Session, todays_articles: Dict[str, An
     truncated_articles = []
     _articles_titles = []
     for topic, contents_dict in todays_articles.items():
-            for article in contents_dict['articles']:
-                # check duplicacy against itself and against data already stored in DB (to save only unique articles)
-                # checking against DB also prunes cross-topic duplicates
-                is_article_unique = article['title'] not in _articles_titles
-                already_in_db = any(session.query(Article).filter(Article.title == article['title']))
-                #current_title_vector = nlp(article["title"]).vector.reshape(1,-1)
-                #print(current_title_vector)
-                #already_in_db = any(session.query(ArticleFeatures).filter(ArticleFeatures.title_similarity(current_title_vector)))
-                is_article_unique = is_article_unique and not already_in_db
-                if (is_article_unique):
-                    truncated_articles += [(topic, article)] 
-                    _articles_titles += [article['title']]
+        for article in contents_dict['articles']:
+            is_article_unique = article['title'] not in _articles_titles
+            already_in_db = any(session.query(Article).filter(Article.title == article['title']))
+            is_article_unique = is_article_unique and not already_in_db
+            if (is_article_unique):
+                truncated_articles += [(topic, article)] 
+                _articles_titles += [article['title']]
     return truncated_articles, _articles_titles
 
 
